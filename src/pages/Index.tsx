@@ -5,6 +5,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 import RolesSticky from "@/components/home/RolesSticky";
 import { Link } from "react-router-dom";
 import { TrendingUp, Share2, PencilRuler, Boxes } from "lucide-react";
+import AboutUsSection from "@/components/ui/about-us-section";
 
 const Index = () => {
   const jsonLd = {
@@ -110,29 +111,21 @@ const Index = () => {
       <RolesSticky roles={roles} />
 
       {/* What Sets Her Apart */}
-      <section id="whatsetsapart" className="section bg-secondary">
-        <div className="container-responsive grid md:grid-cols-2 gap-10 items-center">
-          <Reveal>
-            <h2 className="font-display text-3xl md:text-4xl font-bold">What Sets Her Apart</h2>
-            <p className="text-muted-foreground mt-2">A rare blend of strategy and soul</p>
-          </Reveal>
-          <Reveal>
-            <ul className="space-y-3 text-foreground/90">
-              <li>• A rare blend of strategy, storytelling, and social sensitivity</li>
-              <li>• Industry exposure from farmland to fintech</li>
-              <li>• Builds scalable systems with a creative soul</li>
-              <li>• Deep understanding of both digital transformation and grassroots realities</li>
-              <li>• Leads with clarity, warmth, and results</li>
-              <li>• Turns complex problems into simple, action-based solutions</li>
-            </ul>
-            <div className="mt-4">
-              <Button asChild variant="link">
-                <Link to="/about#whatsetsapart" className="story-link">Know More</Link>
-              </Button>
-            </div>
-          </Reveal>
-        </div>
-      </section>
+      <AboutUsSection
+        id="whatsetsapart"
+        title="What Sets Her Apart"
+        subtitle="A rare blend of strategy and soul"
+        bullets={[
+          "A rare blend of strategy, storytelling, and social sensitivity",
+          "Industry exposure from farmland to fintech",
+          "Builds scalable systems with a creative soul",
+          "Deep understanding of both digital transformation and grassroots realities",
+          "Leads with clarity, warmth, and results",
+          "Turns complex problems into simple, action-based solutions",
+        ]}
+        ctaLabel="Know More"
+        ctaHref="/about#whatsetsapart"
+      />
 
       {/* Services Preview – Four Icon Grid */}
       <section className="section">
