@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 
 export interface RoleItem {
   id: string;
@@ -17,32 +18,66 @@ interface RolesStickyProps {
 
 const RolesSticky: React.FC<RolesStickyProps> = ({ roles }) => {
   const [active, setActive] = useState(0);
-  const refs = useRef<Array<HTMLDivElement | null>>([]);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const { scrollYProgress } = useScroll({
+    container: ref,
+    offset: ["start start", "end start"],
+  });
+  const cardLength = roles.length;
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const index = Number((entry.target as HTMLElement).dataset.index);
-          if (entry.isIntersecting) {
-            setActive(index);
-          }
-        });
-      },
-      { rootMargin: "-40% 0px -50% 0px", threshold: 0.0 }
-    );
-
-    refs.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const breakpoints = roles.map((_, i) => i / cardLength);
+    const closestIndex = breakpoints.reduce((acc, bp, i) => {
+      const d = Math.abs(latest - bp);
+      return d < Math.abs(latest - breakpoints[acc]) ? i : acc;
+    }, 0);
+    setActive(closestIndex);
+  });
 
   const activeRole = useMemo(() => roles[active], [roles, active]);
 
   return (
     <section className="section" aria-labelledby="roles-title">
-      <div className="container-responsive grid gap-8 md:grid-cols-5">
-        <div className="md:col-span-2 md:sticky md:top-24 self-start">
-          <div className="rounded-lg border bg-card shadow-sm p-6 animate-enter">
+      <div className="container-responsive">
+        <motion.div
+          ref={ref}
+          className="h-[30rem] overflow-y-auto flex justify-center relative gap-10 rounded-lg border bg-background p-6"
+        >
+          <div className="relative flex-1 max-w-2xl">
+            {roles.map((role, index) => (
+              <div key={role.id} className="my-20">
+                <motion.h4
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: active === index ? 1 : 0.5 }}
+                  className="font-display text-xl md:text-2xl font-semibold"
+                >
+                  {role.company}
+                </motion.h4>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: active === index ? 1 : 0.5 }}
+                  className="mt-2 text-primary font-medium"
+                >
+                  {role.headline}
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: active === index ? 1 : 0.5 }}
+                  className="mt-3 text-foreground/80"
+                >
+                  {role.body}
+                </motion.p>
+                <Button asChild variant="link" className="mt-3 p-0">
+                  <Link to={role.ctaHref} className="story-link">
+                    {role.ctaLabel}
+                  </Link>
+                </Button>
+              </div>
+            ))}
+            <div className="h-40" />
+          </div>
+
+          <div className="hidden lg:block h-60 w-80 rounded-lg bg-card sticky top-10 overflow-hidden border shadow-sm p-6 animate-enter self-start">
             <p className="text-sm text-muted-foreground">Current Focus</p>
             <h3 id="roles-title" className="font-display text-2xl md:text-3xl font-semibold mt-2">
               {activeRole.company}
@@ -52,24 +87,7 @@ const RolesSticky: React.FC<RolesStickyProps> = ({ roles }) => {
               <Link to={activeRole.ctaHref}>{activeRole.ctaLabel}</Link>
             </Button>
           </div>
-        </div>
-        <div className="md:col-span-3 flex flex-col gap-16">
-          {roles.map((role, i) => (
-            <div
-              key={role.id}
-              data-index={i}
-              ref={(el) => (refs.current[i] = el)}
-              className="rounded-lg border bg-card p-6 shadow-sm"
-            >
-              <h4 className="font-display text-xl md:text-2xl font-semibold">{role.company}</h4>
-              <p className="mt-2 text-primary font-medium">{role.headline}</p>
-              <p className="mt-3 text-foreground/80">{role.body}</p>
-              <Button asChild variant="link" className="mt-3 p-0">
-                <Link to={role.ctaHref} className="story-link">{role.ctaLabel}</Link>
-              </Button>
-            </div>
-          ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
